@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 
 export const components = {
+  category: dynamic(() => import("./Category")),
   contact_form: dynamic(() => import("./ContactForm")),
   image: dynamic(() => import("./Image")),
   quote: dynamic(() => import("./Quote")),
