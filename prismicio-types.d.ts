@@ -5,7 +5,6 @@ import type * as prismic from "@prismicio/client";
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] };
 
 type ArticleDocumentDataSlicesSlice =
-  | CategorySlice
   | ImageSlice
   | QuoteSlice
   | TextSlice
@@ -47,6 +46,17 @@ interface ArticleDocumentData {
    * - **Documentation**: https://prismic.io/docs/field#image
    */
   featuredImage: prismic.ImageField<never>;
+
+  /**
+   * category field in *Article*
+   *
+   * - **Field Type**: Content Relationship
+   * - **Placeholder**: *None*
+   * - **API ID Path**: article.category
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/field#link-content-relationship
+   */
+  category: prismic.ContentRelationshipField<"category">;
 
   /**
    * Slice Zone field in *Article*
@@ -104,6 +114,71 @@ export type ArticleDocument<Lang extends string = string> =
   prismic.PrismicDocumentWithUID<
     Simplify<ArticleDocumentData>,
     "article",
+    Lang
+  >;
+
+/**
+ * Content for category documents
+ */
+interface CategoryDocumentData {
+  /**
+   * name field in *category*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Name
+   * - **API ID Path**: category.name
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  name: prismic.KeyTextField;
+
+  /**
+   * slug field in *category*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: Slug
+   * - **API ID Path**: category.slug
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/field#key-text
+   */
+  slug: prismic.KeyTextField;
+
+  /**
+   * level field in *category*
+   *
+   * - **Field Type**: Select
+   * - **Placeholder**: Level
+   * - **API ID Path**: category.level
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/field#select
+   */
+  level: prismic.SelectField<"continent" | "country" | "region">;
+
+  /**
+   * parent field in *category*
+   *
+   * - **Field Type**: Content Relationship
+   * - **Placeholder**: *None*
+   * - **API ID Path**: category.parent
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/field#link-content-relationship
+   */
+  parent: prismic.ContentRelationshipField<"category">;
+}
+
+/**
+ * category document from Prismic
+ *
+ * - **API ID**: `category`
+ * - **Repeatable**: `true`
+ * - **Documentation**: https://prismic.io/docs/custom-types
+ *
+ * @typeParam Lang - Language API ID of the document.
+ */
+export type CategoryDocument<Lang extends string = string> =
+  prismic.PrismicDocumentWithUID<
+    Simplify<CategoryDocumentData>,
+    "category",
     Lang
   >;
 
@@ -329,74 +404,10 @@ export type SettingsDocument<Lang extends string = string> =
 
 export type AllDocumentTypes =
   | ArticleDocument
+  | CategoryDocument
   | NavigationDocument
   | PageDocument
   | SettingsDocument;
-
-/**
- * Primary content in *Category → Default → Primary*
- */
-export interface CategorySliceDefaultPrimary {
-  /**
-   * cateogry_label field in *Category → Default → Primary*
-   *
-   * - **Field Type**: Text
-   * - **Placeholder**: Category label
-   * - **API ID Path**: category.default.primary.cateogry_label
-   * - **Documentation**: https://prismic.io/docs/field#key-text
-   */
-  cateogry_label: prismic.KeyTextField;
-
-  /**
-   * slug field in *Category → Default → Primary*
-   *
-   * - **Field Type**: Text
-   * - **Placeholder**: Slug
-   * - **API ID Path**: category.default.primary.slug
-   * - **Documentation**: https://prismic.io/docs/field#key-text
-   */
-  slug: prismic.KeyTextField;
-
-  /**
-   * category_level field in *Category → Default → Primary*
-   *
-   * - **Field Type**: Select
-   * - **Placeholder**: Category level
-   * - **API ID Path**: category.default.primary.category_level
-   * - **Documentation**: https://prismic.io/docs/field#select
-   */
-  category_level: prismic.SelectField<"continent" | "country" | "region">;
-}
-
-/**
- * Default variation for Category Slice
- *
- * - **API ID**: `default`
- * - **Description**: Default
- * - **Documentation**: https://prismic.io/docs/slice
- */
-export type CategorySliceDefault = prismic.SharedSliceVariation<
-  "default",
-  Simplify<CategorySliceDefaultPrimary>,
-  never
->;
-
-/**
- * Slice variation for *Category*
- */
-type CategorySliceVariation = CategorySliceDefault;
-
-/**
- * Category Shared Slice
- *
- * - **API ID**: `category`
- * - **Description**: Category
- * - **Documentation**: https://prismic.io/docs/slice
- */
-export type CategorySlice = prismic.SharedSlice<
-  "category",
-  CategorySliceVariation
->;
 
 /**
  * Default variation for ContactForm Slice
@@ -636,6 +647,8 @@ declare module "@prismicio/client" {
       ArticleDocument,
       ArticleDocumentData,
       ArticleDocumentDataSlicesSlice,
+      CategoryDocument,
+      CategoryDocumentData,
       NavigationDocument,
       NavigationDocumentData,
       NavigationDocumentDataLinksItem,
@@ -645,10 +658,6 @@ declare module "@prismicio/client" {
       SettingsDocument,
       SettingsDocumentData,
       AllDocumentTypes,
-      CategorySlice,
-      CategorySliceDefaultPrimary,
-      CategorySliceVariation,
-      CategorySliceDefault,
       ContactFormSlice,
       ContactFormSliceVariation,
       ContactFormSliceDefault,

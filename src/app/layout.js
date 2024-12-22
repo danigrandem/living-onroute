@@ -3,7 +3,7 @@ import "../styles/globals.css";
 import { Inter, Libre_Baskerville } from "next/font/google";
 
 import { PrismicPreview } from "@prismicio/next";
-import { repositoryName } from "@/prismicio";
+import { repositoryName } from "../prismicio";
 
 const inter = Inter({
   subsets: ["latin"],

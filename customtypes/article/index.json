@@ -40,14 +40,21 @@
           "thumbnails": []
         }
       },
+      "category": {
+        "type": "Link",
+        "config": {
+          "label": "category",
+          "select": "document",
+          "repeat": false,
+          "customtypes": ["category"],
+          "required": true
+        }
+      },
       "slices": {
         "type": "Slices",
         "fieldset": "Slice Zone",
         "config": {
           "choices": {
-            "category": {
-              "type": "SharedSlice"
-            },
             "image": {
               "type": "SharedSlice"
             },
