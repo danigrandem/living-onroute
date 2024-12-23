@@ -66,7 +66,34 @@ export const checkPath = async({continent=undefined,country=undefined,region=und
             notFound()
           }
     }
-
-   
     
+}
+
+export const getChildArticles = async(category) => {
+    const client = createClient();
+    const graphQuery = `
+  {
+    article {
+      title
+      category {
+        name
+        slug
+        level
+        parent
+      }
+    }
+  }
+  `;
+  
+  const articles = await client.getAllByType("article", { graphQuery });
+  // Filter articles dynamically where category.parent.slug === "asia"
+  const childArticles = articles.filter(
+    (article) => article.data.category?.data?.parent?.slug === category
+  );
+
+  const currentArticles = articles.filter(
+    (article) => article.data.category?.slug === category
+  );
+
+  return {currentArticles, childArticles}
 }

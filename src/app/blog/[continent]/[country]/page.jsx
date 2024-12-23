@@ -1,6 +1,6 @@
 import * as prismic from "@prismicio/client";
 import { createClient } from "../../../../prismicio";
-import {  checkPath } from "../../../../utils";
+import {  checkPath,getChildArticles } from "../../../../utils";
 import { PrismicText, SliceZone } from "@prismicio/react";
 import { notFound } from 'next/navigation'
 
@@ -64,7 +64,9 @@ export default async function CountryPage({ params }) {
     (article) => article.data.category?.slug === country
   );
 
-  console.log("childArticles",childCountryArticles)
+  const {currentArticles, childArticles} = await getChildArticles(country)
+
+  console.log("childArticles",currentArticles)
   
   return (
     <div>
