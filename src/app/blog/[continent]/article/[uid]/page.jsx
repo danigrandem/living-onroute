@@ -42,7 +42,10 @@ export default async function ArticleInContinentPage({ params }) {
   const data = await params
   const { uid,continent }=data
   await checkPath({continent})
-  const article = await client.getByUID("article", uid);
+  if(continent === uid){
+    notFound()
+  }
+  const article = await client.getByUID("article", uid).catch(() => notFound());
   return (
     <div>
       <PrismicText field={article.data.title} />

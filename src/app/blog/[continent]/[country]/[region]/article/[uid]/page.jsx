@@ -2,6 +2,7 @@ import * as prismic from "@prismicio/client";
 import { createClient } from "../../../../../../../prismicio";
 import {  checkPath } from "../../../../../../../utils";
 import { PrismicText, SliceZone } from "@prismicio/react";
+import { notFound } from 'next/navigation'
 
 
 export async function generateStaticParams() {
@@ -40,7 +41,10 @@ export default async function ArticleRegionPage({ params }) {
   const data = await params
   const { uid,continent, country, region }=data
   await checkPath({continent,country, region})
-  const article = await client.getByUID("article", uid);
+  if(region === uid){
+    notFound()
+  }
+  const article = await client.getByUID("article", uid).catch(() => notFound());;
   return (
     <div>
       <PrismicText field={article.data.title} />

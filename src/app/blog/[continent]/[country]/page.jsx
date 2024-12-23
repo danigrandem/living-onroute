@@ -40,9 +40,31 @@ export default async function CountryPage({ params }) {
   await checkPath({continent,country})
   const article = await client.getByUID("article", country).catch(() => notFound());
 
+  const graphQuery = `
+  {
+    article {
+      title
+      category {
+        name
+        slug
+        level
+        parent
+      }
+    }
+  }
+  `;
   
+  const articles = await client.getAllByType("article", { graphQuery });
+  // Filter articles dynamically where category.parent.slug === "asia"
+  const childRegionCountryArticles = articles.filter(
+    (article) => article.data.category?.data?.parent?.slug === country
+  );
 
+  const childCountryArticles = articles.filter(
+    (article) => article.data.category?.slug === country
+  );
 
+  console.log("childArticles",childCountryArticles)
   
   return (
     <div>
