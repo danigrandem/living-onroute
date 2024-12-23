@@ -1,64 +1,53 @@
 import * as prismic from "@prismicio/client";
-import { createClient } from "@/prismicio";
-import Link from "next/link";
+import { createClient } from "../../../../prismicio";
+import {  checkPath } from "../../../../utils";
+import { PrismicText, SliceZone } from "@prismicio/react";
+import { notFound } from 'next/navigation'
+
 
 export async function generateStaticParams() {
   const client = createClient();
 
-  // Obtén todos los países
-  const countries = await client.getAllByType("category", {
-    predicates: [prismic.predicate.at("my.category.level", "country")],
-  });
+  // Obtén los artículos directamente relacionados con continentes
+  const graphQuery = `
+  {
+    article {
+      title
+      category {
+        slug
+        level
+      }
+    }
+  }
+  `;
+  
+  const articles = await client.getAllByType("article", { graphQuery });
+  
+  const filteredArticles = articles.filter(
+    (article) => article.data.category?.data.level === "country"
+  );
 
-  return countries.map((country) => ({
-    continent: country.data.parent.slug,
-    country: country.slug,
+  return filteredArticles.map((article) => ({
+    continent: article.data.category.slug,
+    uid: article.uid,
   }));
 }
 
 export default async function CountryPage({ params }) {
   const client = createClient();
+  const data = await params
+  const { uid,continent, country }=data
+  await checkPath({continent,country})
+  const article = await client.getByUID("article", country).catch(() => notFound());
 
-  // Obtén las regiones del país actual
-  const regions = await client.getAllByType("category", {
-    predicates: [
-      prismic.predicate.at("my.category.level", "region"),
-      prismic.predicate.at("my.category.parent", params.country),
-    ],
-  });
+  
 
-  // Obtén los artículos directamente relacionados con el país
-  const articles = await client.getAllByType("article", {
-    predicates: [
-      prismic.predicate.at("my.category.slug", params.country),
-    ],
-  });
 
+  
   return (
     <div>
-      <h1>{params.country.toUpperCase()}</h1>
-
-      <h2>Regions</h2>
-      <ul>
-        {regions.map((region) => (
-          <li key={region.id}>
-            <Link href={`/${params.continent}/${params.country}/${region.slug}`}>
-              {region.data.name}
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <h2>Articles About {params.country}</h2>
-      <ul>
-        {articles.map((article) => (
-          <li key={article.id}>
-            <Link href={`/${params.continent}/${params.country}/${article.uid}`}>
-              {article.data.title}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <PrismicText field={article.data.title} />
+      <p>Located in: {continent}</p>
     </div>
   );
 }

@@ -1,9 +1,14 @@
 import * as prismic from "@prismicio/client";
-import { createClient } from "../../../../prismicio";
+import { createClient } from "../../../../../prismicio";
+import {  checkPath } from "../../../../../utils";
 import { PrismicText, SliceZone } from "@prismicio/react";
+import { notFound } from 'next/navigation'
+
 
 export async function generateStaticParams() {
   const client = createClient();
+
+
 
   // Obtén los artículos directamente relacionados con continentes
   const graphQuery = `
@@ -24,26 +29,24 @@ export async function generateStaticParams() {
     (article) => article.data.category?.data.level === "region"
   );
 
-  
   return filteredArticles.map((article) => ({
-    region: article.data.category.slug,
+    continent: article.data.category.slug,
     uid: article.uid,
   }));
 }
 
 export default async function RegionPage({ params }) {
-
-  return null
+  
   const client = createClient();
-
-  const { uid,region } = await params
-console.log("joder mierda", uid, region)
-  const article = await client.getByUID("article", uid);
-  console.log("calla2,",article.data.title)
+  const data = await params
+  const { uid,continent, country,region }=data
+  await checkPath({continent,country, region})
+  const article = await client.getByUID("article", region).catch(() => notFound());;
+  
   return (
     <div>
       <PrismicText field={article.data.title} />
-      <p>Located in: {region}</p>
+      <p>Located in: {continent}</p>
     </div>
   );
 }
