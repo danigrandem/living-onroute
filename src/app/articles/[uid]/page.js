@@ -3,12 +3,12 @@ import * as prismic from "@prismicio/client";
 import { PrismicNextLink } from "@prismicio/next";
 import { PrismicText, SliceZone } from "@prismicio/react";
 
-import { createClient } from "@/prismicio";
-import { components } from "@/slices";
-import { Layout } from "@/components/Layout";
-import { Bounded } from "@/components/Bounded";
-import { Heading } from "@/components/Heading";
-import { HorizontalDivider } from "@/components/HorizontalDivider";
+import { createClient } from "../../../prismicio";
+import { components } from "../../../slices";
+import { Layout } from "../../../components/Layout";
+import { Bounded } from "../../../components/Bounded";
+import { Heading } from "../../../components/Heading";
+import { HorizontalDivider } from "../../../components/HorizontalDivider";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",

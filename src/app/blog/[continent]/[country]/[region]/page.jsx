@@ -24,6 +24,8 @@ export async function generateStaticParams() {
   `;
   
   const articles = await client.getAllByType("article", { graphQuery });
+
+  console.log("caaala",articles)
   
   const filteredArticles = articles.filter(
     (article) => article.data.category?.data.level === "region"

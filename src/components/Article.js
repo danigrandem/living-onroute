@@ -2,9 +2,9 @@ import { PrismicText } from "@prismicio/react";
 import { PrismicNextImage, PrismicNextLink } from "@prismicio/next";
 import * as prismic from "@prismicio/client";
 
-import { getExcerpt } from "@/lib/getExcerpt";
-import { findFirstImage } from "@/lib/findFirstImage";
-import { dateFormatter } from "@/lib/dateFormatter";
+import { getExcerpt } from "../lib/getExcerpt";
+import { findFirstImage } from "../lib/findFirstImage";
+import { dateFormatter } from "../lib/dateFormatter";
 
 import { Heading } from "./Heading";
 

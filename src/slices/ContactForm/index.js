@@ -1,4 +1,4 @@
-import { Bounded } from "@/components/Bounded";
+import { Bounded } from "../../components/Bounded";
 
 const Field = ({ label, children }) => {
   return (

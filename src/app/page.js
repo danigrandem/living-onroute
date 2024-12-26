@@ -1,9 +1,9 @@
 import * as prismic from "@prismicio/client";
 
-import { createClient } from "@/prismicio";
-import { Layout } from "@/components/Layout";
-import { Bounded } from "@/components/Bounded";
-import { Article } from "@/components/Article";
+import { createClient } from "../prismicio";
+import { Layout } from "../components/Layout";
+import { Bounded } from "../components/Bounded";
+import { Article } from "../components/Article";
 
 export async function generateMetadata() {
   const client = createClient();

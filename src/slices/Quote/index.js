@@ -1,7 +1,7 @@
 import * as prismic from "@prismicio/client";
 import { PrismicText } from "@prismicio/react";
 
-import { Bounded } from "@/components/Bounded";
+import { Bounded } from "../../components/Bounded";
 
 const Quote = ({ slice }) => {
   return (
