@@ -1,36 +1,12 @@
 import * as prismic from "@prismicio/client";
 import { createClient } from "../../../../prismicio";
-import {  checkPath,getChildArticles } from "../../../../utils";
+import {  checkPath,getChildArticles, getStaticParams } from "../../../../utils";
 import { PrismicText, SliceZone } from "@prismicio/react";
 import { notFound } from 'next/navigation'
 
 
 export async function generateStaticParams() {
-  const client = createClient();
-
-  // Obtén los artículos directamente relacionados con continentes
-  const graphQuery = `
-  {
-    article {
-      title
-      category {
-        slug
-        level
-      }
-    }
-  }
-  `;
-  
-  const articles = await client.getAllByType("article", { graphQuery });
-  
-  const filteredArticles = articles.filter(
-    (article) => article.data.category?.data.level === "country"
-  );
-
-  return filteredArticles.map((article) => ({
-    continent: article.data.category.slug,
-    uid: article.uid,
-  }));
+  return getStaticParams('country')
 }
 
 export default async function CountryPage({ params }) {
@@ -75,3 +51,6 @@ export default async function CountryPage({ params }) {
     </div>
   );
 }
+
+export const dynamic = 'force-static'
+export const dynamicParams = false

@@ -30,6 +30,27 @@ export const getLevelCategories = async(type) => {
     return filterCategories(allCategories, type)
 }
 
+export const getParentSlugs=(slug, allCategories, slugs = [])=> {
+  // Encuentra la categoría correspondiente al slug actual
+  const category = allCategories.find((cat) => cat.data.slug === slug);
+
+  if (!category) {
+    // Si no se encuentra la categoría, retorna los slugs acumulados
+    return slugs;
+  }
+
+  // Agregar el slug actual al inicio del array
+  slugs.unshift(category.data.slug);
+
+  // Si tiene un parent, continuar recursivamente
+  if (category.data.parent && category.data.parent.slug) {
+    return getParentSlugs(category.data.parent.slug, allCategories, slugs);
+  }
+
+  // Si no tiene un parent, devolver los slugs acumulados
+  return slugs;
+}
+
 
 
 export const checkPath = async({continent=undefined,country=undefined,region=undefined}) => {
@@ -96,4 +117,45 @@ export const getChildArticles = async(category) => {
   );
 
   return {currentArticles, childArticles}
+}
+
+export async function getStaticParams(level) {
+  const client = createClient();
+
+
+
+  // Obtén los artículos directamente relacionados con continentes
+  const graphQuery = `
+  {
+    article {
+      title
+      category {
+        slug
+        level
+        parent {
+          slug
+          level
+        }
+      }
+    }
+  }
+  `;
+  
+  const articles = await client.getAllByType("article", { graphQuery });
+
+  const filteredArticles = articles.filter(
+    (article) => article.data.category?.data.level === level
+  );
+  const allCategories = await getAllCategories()
+
+  return filteredArticles.map((article) => {
+    const slugs = getParentSlugs(article.data.category.slug, allCategories)
+    return {
+    continent: slugs[0],
+    uid: article.uid,
+    region: slugs?.[2],
+    country: slugs?.[1]
+  }
+}
+);
 }
