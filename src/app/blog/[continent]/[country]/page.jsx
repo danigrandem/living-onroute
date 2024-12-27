@@ -42,8 +42,6 @@ export default async function CountryPage({ params }) {
 
   const {currentArticles, childArticles} = await getChildArticles(country)
 
-  console.log("childArticles",currentArticles)
-  
   return (
     <div>
       <PrismicText field={article.data.title} />

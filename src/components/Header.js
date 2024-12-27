@@ -2,10 +2,11 @@ import Link from "next/link";
 import * as prismic from "@prismicio/client";
 import { PrismicText } from "@prismicio/react";
 import { PrismicNextLink, PrismicNextImage } from "@prismicio/next";
-
+import { createClient } from "../prismicio";
 import { Bounded } from "./Bounded";
 import { Heading } from "./Heading";
-import { HorizontalDivider } from "./HorizontalDivider";
+import { HeaderMenu } from "./HeaderMenu";
+import { getParents, getAllCategories } from "../utils";
 
 const Profile = ({ name, description, profilePicture }) => {
   return (
@@ -25,21 +26,21 @@ const Profile = ({ name, description, profilePicture }) => {
         </PrismicNextLink>
         {(prismic.isFilled.richText(name) ||
           prismic.isFilled.richText(description)) && (
-          <div className="grid grid-cols-1 gap-2 text-center">
-            {prismic.isFilled.richText(name) && (
-              <Heading>
-                <PrismicNextLink href="/">
-                  <PrismicText field={name} />
-                </PrismicNextLink>
-              </Heading>
-            )}
-            {prismic.isFilled.richText(description) && (
-              <p className="font-serif text-2xl italic leading-normal tracking-tight text-slate-500">
-                <PrismicText field={description} />
-              </p>
-            )}
-          </div>
-        )}
+            <div className="grid grid-cols-1 gap-2 text-center">
+              {prismic.isFilled.richText(name) && (
+                <Heading>
+                  <PrismicNextLink href="/">
+                    <PrismicText field={name} />
+                  </PrismicNextLink>
+                </Heading>
+              )}
+              {prismic.isFilled.richText(description) && (
+                <p className="font-serif text-2xl italic leading-normal tracking-tight text-slate-500">
+                  <PrismicText field={description} />
+                </p>
+              )}
+            </div>
+          )}
       </div>
     </div>
   );
@@ -51,23 +52,109 @@ const NavItem = ({ children }) => {
   );
 };
 
-export const Header = ({
+export const Header = async ({
   withDivider = true,
   withProfile = true,
-  navigation,
-  settings,
 }) => {
+  const client = createClient();
+  const graphQuery = `
+  {
+    article {
+      title
+      category {
+        slug
+        level
+        parent {
+          slug
+          level
+        }
+      }
+    }
+  }
+  `;
+
+  const articles = await client.getAllByType("article", { graphQuery });
+
+  const regionArticles = articles.filter(
+    (article) => article.data.category?.data.level === 'region'
+  );
+  const allCategories = await getAllCategories()
+  const menu = {};
+
+  // Helper function to get the full hierarchy for a region
+  function getParentHierarchy(slug, categories, hierarchy = []) {
+    const category = categories.find((cat) => cat.data.slug === slug);
+    if (!category) return hierarchy;
+
+    // Add the full category details to the hierarchy array
+    hierarchy.unshift({
+      name: category.data.name,
+      slug: category.data.slug,
+      level: category.data.level,
+      parent: category.data.parent,
+    });
+
+    // Continue traversing up the parent hierarchy
+    if (category.data.parent && category.data.parent.slug) {
+      return getParentHierarchy(category.data.parent.slug, categories, hierarchy);
+    }
+
+    return hierarchy;
+  }
+
+  // Process each article
+  regionArticles.forEach((article) => {
+    const categorySlug = article.data.category.slug;
+
+    // Get the full hierarchy for the region
+    const hierarchy = getParents(categorySlug, allCategories);
+
+    if (hierarchy.length >= 3) {
+      // Extract continent, country, and region details
+      const [continent, country, region] = hierarchy;
+
+      // Initialize the structure if not present
+      if (!menu[continent.slug]) {
+        menu[continent.slug] = {
+          name: continent.name,
+          slug: continent.slug,
+          level: continent.level,
+          childs: {},
+        };
+      }
+
+      if (!menu[continent.slug].childs[country.slug]) {
+        menu[continent.slug].childs[country.slug] = {
+          name: country.name,
+          slug: country.slug,
+          level: country.level,
+          childs: [],
+        };
+      }
+
+      // Add the region if it's not already present
+      const existingRegions = menu[continent.slug].childs[country.slug].childs;
+      if (!existingRegions.find((r) => r.slug === region.slug)) {
+        existingRegions.push({
+          name: region.name,
+          slug: region.slug,
+          level: region.level,
+        });
+      }
+    }
+  });
+  console.log("k sale 2a", menu)
   return (
-    <Bounded as="header">
-      <div className="grid grid-cols-1 justify-items-center gap-20">
+    <Bounded as="header" size="wider">
+      <div className="flex justify-between gap-20">
+        <Link href="/">
+          LOGO
+        </Link>
+
+        <HeaderMenu menuData={menu} />
         <nav>
           <ul className="flex flex-wrap justify-center gap-10">
-            <NavItem>
-              <Link href="/">
-                <PrismicText field={navigation.data.homepageLabel} />
-              </Link>
-            </NavItem>
-            {navigation.data?.links.map((item) => (
+            {false && navigation.data?.links.map((item) => (
               <NavItem key={prismic.asText(item.label)}>
                 <PrismicNextLink field={item.link}>
                   <PrismicText field={item.label} />
@@ -75,15 +162,9 @@ export const Header = ({
               </NavItem>
             ))}
           </ul>
+
         </nav>
-        {withProfile && (
-          <Profile
-            name={settings.data.name}
-            description={settings.data.description}
-            profilePicture={settings.data.profilePicture}
-          />
-        )}
-        {withDivider && <HorizontalDivider />}
+        <div />
       </div>
     </Bounded>
   );

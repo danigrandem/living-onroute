@@ -18,7 +18,6 @@ export default async function RegionPage({ params }) {
   const article = await client.getByUID("article", region).catch(() => notFound());;
   const {currentArticles, childArticles} = await getChildArticles(country)
 
-  console.log("childArticles",currentArticles)
   return (
     <div>
       <PrismicText field={article.data.title} />

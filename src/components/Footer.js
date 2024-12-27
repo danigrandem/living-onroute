@@ -15,23 +15,6 @@ function SignUpForm({ settings }) {
         method="post"
         className="grid w-full max-w-xl grid-cols-1 gap-6"
       >
-        {prismic.isFilled.richText(settings.data.newsletterDisclaimer) && (
-          <div className="text-center font-serif tracking-tight text-slate-500">
-            <PrismicRichText
-              field={settings.data.newsletterDescription}
-              components={{
-                heading1: ({ children }) => (
-                  <Heading as="h2" className="mb-4 last:mb-0">
-                    {children}
-                  </Heading>
-                ),
-                paragraph: ({ children }) => (
-                  <p className="mb-4 italic last:mb-0">{children}</p>
-                ),
-              }}
-            />
-          </div>
-        )}
         <div className="grid grid-cols-1 gap-2">
           <div className="relative">
             <label>
@@ -52,11 +35,6 @@ function SignUpForm({ settings }) {
               <span aria-hidden={true}>&rarr;</span>
             </button>
           </div>
-          {prismic.isFilled.richText(settings.data.newsletterDisclaimer) && (
-            <p className="text-center text-xs tracking-tight text-slate-500">
-              <PrismicText field={settings.data.newsletterDisclaimer} />
-            </p>
-          )}
         </div>
       </form>
     </div>
